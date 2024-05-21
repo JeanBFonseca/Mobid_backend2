@@ -1,0 +1,152 @@
+CONFIGURAÇÃO PARA EXECUTAR O PROJETO NO AMBIENTE VIRTUAL:
+
+**Sim, você pode executar seu projeto no ambiente virtual seguindo as etapas abaixo. Vou detalhar o processo desde a criação do ambiente virtual até a execução do projeto.
+
+Passos para Configurar e Executar o Projeto no Ambiente Virtual
+Clonar o Repositório (se necessário)
+Se o projeto estiver em um repositório remoto, clone-o usando git:
+
+bash
+Copiar código
+git clone <url_do_repositorio>
+cd my_project
+Criar um Ambiente Virtual
+Crie um ambiente virtual para isolar as dependências do projeto:
+
+bash
+Copiar código
+python -m venv venv
+Ativar o Ambiente Virtual
+Ative o ambiente virtual. O comando depende do seu sistema operacional:
+
+Windows:
+
+bash
+Copiar código
+venv\Scripts\activate
+Linux/MacOS:
+
+bash
+Copiar código
+source venv/bin/activate
+Instalar as Dependências
+Instale as dependências listadas no arquivo requirements.txt:
+
+bash
+Copiar código
+pip install -r requirements.txt
+Iniciar a Aplicação
+Utilize o uvicorn para iniciar a aplicação FastAPI. Certifique-se de estar no diretório raiz do projeto onde está localizado o arquivo main.py:
+
+bash
+Copiar código
+uvicorn app.main:app --reload
+Arquivos e Configurações Importantes
+Estrutura do Projeto (confirmando a estrutura):
+
+markdown
+Copiar código
+my_project/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── cliente_model.py
+│   ├── views/
+│   │   ├── __init__.py
+│   │   └── cliente_view.py
+│   ├── controllers/
+│   │   ├── __init__.py
+│   │   └── cliente_controller.py
+│   ├── repositories/
+│   │   ├── __init__.py
+│   │   └── cliente_repository.py
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   └── cliente_schema.py
+│   ├── config/
+│   │   ├── __init__.py
+│   │   └── database.py
+│   └── dependencies/
+│       ├── __init__.py
+│       └── db.py
+├── venv/
+├── tests/
+│   ├── __init__.py
+│   ├── test_cliente.py
+│   └── ...
+├── .gitignore
+├── requirements.txt
+└── README.md
+Conteúdo de requirements.txt:
+
+plaintext
+Copiar código
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+sqlite
+Conteúdo de .gitignore:
+
+gitignore
+Copiar código
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.sqlite3
+instance/
+.webassets-cache
+.env
+.DS_Store
+.idea/
+.vscode/
+*.log
+Testando a Configuração
+Verificar a Ativação do Ambiente Virtual
+Após a ativação do ambiente virtual, você deve ver o prefixo (venv) no seu terminal.
+
+Instalar Dependências
+Execute pip list para verificar se as dependências foram instaladas corretamente.
+
+Executar a Aplicação
+Quando você executa uvicorn app.main:app --reload, você deve ver uma saída semelhante a esta no terminal:
+
+plaintext
+Copiar código
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [28756]
+INFO:     Started server process [28758]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+Acessar a Aplicação
+Abra um navegador web e navegue para http://127.0.0.1:8000. Você deve ver a mensagem de boas-vindas.
+
+Documentação Interativa da API
+Acesse http://127.0.0.1:8000/docs para ver a documentação interativa gerada pelo FastAPI.
+
+Passos Finais
+Desativar o Ambiente Virtual
+Quando terminar de trabalhar no projeto, você pode desativar o ambiente virtual com:
+
+bash
+Copiar código
+deactivate
+Reativar o Ambiente Virtual
+Para voltar a trabalhar no projeto, ative o ambiente virtual novamente:
+
+bash
+Copiar código
+# Windows
+venv\Scripts\activate
+# Linux/MacOS
+source venv/bin/activate
+Seguindo esses passos, você consegue configurar e executar seu projeto Python com FastAPI em um ambiente virtual, garantindo um ambiente isolado e consistente para o desenvolvimento.
+
+
+
+from datetime import date
+
+

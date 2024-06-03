@@ -1,3 +1,6 @@
+**COMANDO PARA EXECUTAR O CÓDIGO
+uvicorn main:app --host 0.0.0.0 --reload 
+
 CONFIGURAÇÃO PARA EXECUTAR O PROJETO NO AMBIENTE VIRTUAL:
 
 **Sim, você pode executar seu projeto no ambiente virtual seguindo as etapas abaixo. Vou detalhar o processo desde a criação do ambiente virtual até a execução do projeto.

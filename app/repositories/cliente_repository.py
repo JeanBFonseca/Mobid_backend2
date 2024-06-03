@@ -25,3 +25,7 @@ class ClienteRepository:
         if cliente is not None:
             db.delete(cliente)
             db.commit()
+
+    @staticmethod
+    def find_all(db: Session) -> list[ClienteDB]:
+        return db.query(ClienteDB).all()

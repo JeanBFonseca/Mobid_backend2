@@ -1,15 +1,18 @@
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy.orm import relationship
 from config.database import Base
 
-class ClienteDB(Base):
-    __tablename__ = "tb_cliente"
+class Cliente(Base):
+    __tablename__ = 'tb_cliente'
 
-    cliente_id: int = Column(Integer, primary_key=True, index=True)
-    nome: str = Column(String(255), nullable=False)
-    cpf: str = Column(String(11), nullable=False)
-    email: str = Column(String(255), nullable=False)
-    senha: str = Column(String(255), nullable=False)
-    endereco: str = Column(String(255), nullable=False)
-    telefone: str = Column(String(11), nullable=False)
-    dt_nascimento: Date = Column(Date, nullable=False)
-    sexo: str  = Column(String(9), nullable=False)
+    cliente_id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, nullable=False)
+    cpf = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    senha = Column(String, nullable=False)
+    cep = Column(String, ForeignKey("tb_endereco.cep"), nullable=False)
+    telefone = Column(String, nullable=False)
+    dt_nascimento = Column(Date, nullable=False)
+    sexo = Column(String, nullable=False)
+
+    endereco = relationship("Endereco", back_populates="clientes")

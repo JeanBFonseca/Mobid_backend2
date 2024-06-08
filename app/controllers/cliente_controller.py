@@ -1,39 +1,27 @@
-from fastapi import HTTPException, status, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from fastapi.responses import Response
-from dependencies.db import get_db
-from schemas.cliente_schema import ClienteRequest, ClienteResponse
-from models.cliente_model import ClienteDB
-from repositories.cliente_repository import ClienteRepository
+from dependencies import db
+from repositories import cliente_repository
+from schemas import cliente_schema
+from typing import List
 
-def create_cliente(request: ClienteRequest, db: Session = Depends(get_db)):
-    cliente = ClienteRepository.save(db, ClienteDB(**request.model_dump()))
-    return ClienteResponse.model_validate(cliente)
+router = APIRouter()
 
-def get_all_clientes(db: Session = Depends(get_db)):
-    clientes = ClienteRepository.find_all(db)
-    return [ClienteResponse.model_validate(cliente) for cliente in clientes]
+@router.post("/clientes/", response_model=cliente_schema.Cliente)
+def create_cliente(cliente: cliente_schema.ClienteCreate, db: Session = Depends(db.get_db)):
+    return cliente_repository.create_cliente(db=db, cliente=cliente)
 
-def get_cliente_by_id(id: int, db: Session = Depends(get_db)):
-    cliente = ClienteRepository.find_by_id(db, id)
-    if not cliente:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Cliente não encontrado"
-        )
-    return ClienteResponse.model_validate(cliente)
+@router.get("/clientes/", response_model=List[cliente_schema.Cliente])
+def read_clientes(skip: int = 0, limit: int = 10, db: Session = Depends(db.get_db)):
+    return cliente_repository.get_clientes(db=db, skip=skip, limit=limit)
 
-def delete_cliente_by_id(id: int, db: Session = Depends(get_db)):
-    if not ClienteRepository.exists_by_id(db, id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Cliente não encontrado"
-        )
-    ClienteRepository.delete_by_id(db, id)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+@router.get("/clientes/{cliente_id}", response_model=cliente_schema.Cliente)
+def read_cliente(cliente_id: int, db: Session = Depends(db.get_db)):
+    db_cliente = cliente_repository.get_cliente(db, cliente_id=cliente_id)
+    if db_cliente is None:
+        raise HTTPException(status_code=404, detail="Cliente not found")
+    return db_cliente
 
-def update_cliente(id: int, request: ClienteRequest, db: Session = Depends(get_db)):
-    if not ClienteRepository.exists_by_id(db, id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Cliente não encontrado"
-        )
-    cliente = ClienteRepository.save(db, ClienteDB(id=id, **request.model_dump.dict()))
-    return ClienteResponse.model_validate(cliente)
+@router.delete("/clientes/{cliente_id}", response_model=cliente_schema.Cliente)
+def delete_cliente(cliente_id: int, db: Session = Depends(db.get_db)):
+    return cliente_repository.delete_cliente(db, cliente_id=cliente_id)

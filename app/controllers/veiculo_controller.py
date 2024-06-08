@@ -1,39 +1,27 @@
-from fastapi import HTTPException, status, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from fastapi.responses import Response
-from dependencies.db import get_db
-from schemas.veiculo_schema import VeiculoRequest, VeiculoResponse
-from models.veiculo_model import VeiculoDB
-from repositories.veiculo_repository import VeiculoRepository
+from dependencies import db
+from repositories import veiculo_repository
+from schemas import veiculo_schema
+from typing import List
 
-def create_veiculo(request: VeiculoRequest, db: Session = Depends(get_db)):
-    veiculo = VeiculoRepository.save(db, VeiculoDB(**request.model_dump()))
-    return VeiculoResponse.model_validate(veiculo)
+router = APIRouter()
 
-def get_all_veiculos(db: Session = Depends(get_db)):
-    veiculos = VeiculoRepository.find_all(db)
-    return [VeiculoResponse.model_validate(veiculo) for veiculo in veiculos]
+@router.post("/veiculos/", response_model=veiculo_schema.Veiculo)
+def create_veiculo(veiculo: veiculo_schema.VeiculoCreate, db: Session = Depends(db.get_db)):
+    return veiculo_repository.create_veiculo(db=db, veiculo=veiculo)
 
-def get_veiculo_by_id(id: int, db: Session = Depends(get_db)):
-    veiculo = VeiculoRepository.find_by_id(db, id)
-    if not veiculo:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Veículo não encontrado"
-        )
-    return VeiculoResponse.model_validate(veiculo)
+@router.get("/veiculos/", response_model=List[veiculo_schema.Veiculo])
+def read_veiculos(skip: int = 0, limit: int = 10, db: Session = Depends(db.get_db)):
+    return veiculo_repository.get_veiculos(db=db, skip=skip, limit=limit)
 
-def delete_veiculo_by_id(id: int, db: Session = Depends(get_db)):
-    if not VeiculoRepository.exists_by_id(db, id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Veículo não encontrado"
-        )
-    VeiculoRepository.delete_by_id(db, id)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+@router.get("/veiculos/{veiculo_id}", response_model=veiculo_schema.Veiculo)
+def read_veiculo(veiculo_id: int, db: Session = Depends(db.get_db)):
+    db_veiculo = veiculo_repository.get_veiculo(db, veiculo_id=veiculo_id)
+    if db_veiculo is None:
+        raise HTTPException(status_code=404, detail="Veiculo not found")
+    return db_veiculo
 
-def update_veiculo(id: int, request: VeiculoRequest, db: Session = Depends(get_db)):
-    if not VeiculoRepository.exists_by_id(db, id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Veículo não encontrado"
-        )
-    veiculo = VeiculoRepository.save(db, VeiculoDB(id=id, **request.model_dump.dict()))
-    return VeiculoResponse.model_validate(veiculo)
+@router.delete("/veiculos/{veiculo_id}", response_model=veiculo_schema.Veiculo)
+def delete_veiculo(veiculo_id: int, db: Session = Depends(db.get_db)):
+    return veiculo_repository.delete_veiculo(db, veiculo_id=veiculo_id)

@@ -1,20 +1,20 @@
-from pydantic import BaseModel, ConfigDict
-from datetime import date
+from pydantic import BaseModel
 
 class VeiculoBase(BaseModel):
-    tb_motorista_motorista_id: int
+    motorista_id: int
     placa: str
     renavam: int
     chassis: str
-    ano_fabricacao: date
+    ano_fabricacao: int
     cor: str
     modelo: str
-    foto_veiculo: bytes = None
+    foto_veiculo: bytes
 
-class VeiculoRequest(VeiculoBase):
-    ...
+class VeiculoCreate(VeiculoBase):
+    pass
 
-class VeiculoResponse(VeiculoBase):
+class Veiculo(VeiculoBase):
     veiculo_id: int
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True  # Alterado de 'orm_mode' para 'from_attributes'

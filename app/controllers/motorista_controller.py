@@ -1,39 +1,27 @@
-from fastapi import HTTPException, status, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from fastapi.responses import Response
-from dependencies.db import get_db
-from schemas.motorista_schema import MotoristaRequest, MotoristaResponse
-from models.motorista_model import MotoristaDB
-from repositories.motorista_repository import MotoristaRepository
+from dependencies import db
+from repositories import motorista_repository
+from schemas import motorista_schema
+from typing import List
 
-def create_motorista(request: MotoristaRequest, db: Session = Depends(get_db)):
-    motorista = MotoristaRepository.save(db, MotoristaDB(**request.model_dump()))
-    return MotoristaResponse.model_validate(motorista)
+router = APIRouter()
 
-def get_all_motoristas(db: Session = Depends(get_db)):
-    motoristas = MotoristaRepository.find_all(db)
-    return [MotoristaResponse.model_validate(motorista) for motorista in motoristas]
+@router.post("/motoristas/", response_model=motorista_schema.Motorista)
+def create_motorista(motorista: motorista_schema.MotoristaCreate, db: Session = Depends(db.get_db)):
+    return motorista_repository.create_motorista(db=db, motorista=motorista)
 
-def get_motorista_by_id(id: int, db: Session = Depends(get_db)):
-    motorista = MotoristaRepository.find_by_id(db, id)
-    if not motorista:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Motorista não encontrado"
-        )
-    return MotoristaResponse.model_validate(motorista)
+@router.get("/motoristas/", response_model=List[motorista_schema.Motorista])
+def read_motoristas(skip: int = 0, limit: int = 10, db: Session = Depends(db.get_db)):
+    return motorista_repository.get_motoristas(db=db, skip=skip, limit=limit)
 
-def delete_motorista_by_id(id: int, db: Session = Depends(get_db)):
-    if not MotoristaRepository.exists_by_id(db, id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Motorista não encontrado"
-        )
-    MotoristaRepository.delete_by_id(db, id)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+@router.get("/motoristas/{motorista_id}", response_model=motorista_schema.Motorista)
+def read_motorista(motorista_id: int, db: Session = Depends(db.get_db)):
+    db_motorista = motorista_repository.get_motorista(db, motorista_id=motorista_id)
+    if db_motorista is None:
+        raise HTTPException(status_code=404, detail="Motorista not found")
+    return db_motorista
 
-def update_motorista(id: int, request: MotoristaRequest, db: Session = Depends(get_db)):
-    if not MotoristaRepository.exists_by_id(db, id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Motorista não encontrado"
-        )
-    motorista = MotoristaRepository.save(db, MotoristaDB(id=id, **request.model_dump.dict()))
-    return MotoristaResponse.model_validate(motorista)
+@router.delete("/motoristas/{motorista_id}", response_model=motorista_schema.Motorista)
+def delete_motorista(motorista_id: int, db: Session = Depends(db.get_db)):
+    return motorista_repository.delete_motorista(db, motorista_id=motorista_id)

@@ -1,20 +1,21 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from datetime import date
 
-class ClienteBase(BaseModel): 
-    nome: str 
-    cpf: str 
-    email: str 
-    senha: str 
-    endereco: str 
-    telefone: str 
+class ClienteBase(BaseModel):
+    nome: str
+    cpf: str
+    email: str
+    senha: str
+    cep: str
+    telefone: str
     dt_nascimento: date
-    sexo: str 
+    sexo: str
 
-class ClienteRequest(ClienteBase):
-    ...
+class ClienteCreate(ClienteBase):
+    pass
 
-class ClienteResponse(ClienteBase):
+class Cliente(ClienteBase):
     cliente_id: int
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True  # Alterado de 'orm_mode' para 'from_attributes'

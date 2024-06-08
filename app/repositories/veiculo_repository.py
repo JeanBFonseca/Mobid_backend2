@@ -1,31 +1,33 @@
 from sqlalchemy.orm import Session
-from models.veiculo_model import VeiculoDB
+from models.veiculo_model import Veiculo
+from schemas.veiculo_schema import VeiculoCreate
 
-class VeiculoRepository:
-    @staticmethod
-    def save(db: Session, veiculo: VeiculoDB) -> VeiculoDB:
-        if veiculo.veiculo_id:
-            db.merge(veiculo)
-        else:
-            db.add(veiculo)
+def create_veiculo(db: Session, veiculo: VeiculoCreate):
+    db_veiculo = Veiculo(
+        motorista_id=veiculo.motorista_id,
+        placa=veiculo.placa,
+        renavam=veiculo.renavam,
+        chassis=veiculo.chassis,
+        ano_fabricacao=veiculo.ano_fabricacao,
+        cor=veiculo.cor,
+        modelo=veiculo.modelo,
+        foto_veiculo=veiculo.foto_veiculo
+    )
+    db.add(db_veiculo)
+    db.commit()
+    db.refresh(db_veiculo)
+    return db_veiculo
+
+def get_veiculo(db: Session, veiculo_id: int):
+    return db.query(Veiculo).filter(Veiculo.veiculo_id == veiculo_id).first()
+
+def get_veiculos(db: Session, skip: int = 0, limit: int = 10):
+    return db.query(Veiculo).offset(skip).limit(limit).all()
+
+def delete_veiculo(db: Session, veiculo_id: int):
+    db_veiculo = get_veiculo(db, veiculo_id)
+    if db_veiculo:
+        db.delete(db_veiculo)
         db.commit()
-        return veiculo
-
-    @staticmethod
-    def find_by_id(db: Session, id: int) -> VeiculoDB:
-        return db.query(VeiculoDB).filter(VeiculoDB.veiculo_id == id).first()
-
-    @staticmethod
-    def exists_by_id(db: Session, id: int) -> bool:
-        return db.query(VeiculoDB).filter(VeiculoDB.veiculo_id == id).first() is not None
-
-    @staticmethod
-    def delete_by_id(db: Session, id: int) -> None:
-        veiculo = db.query(VeiculoDB).filter(VeiculoDB.veiculo_id == id).first()
-        if veiculo is not None:
-            db.delete(veiculo)
-            db.commit()
-
-    @staticmethod
-    def find_all(db: Session) -> list[VeiculoDB]:
-        return db.query(VeiculoDB).all()
+        return db_veiculo
+    return None

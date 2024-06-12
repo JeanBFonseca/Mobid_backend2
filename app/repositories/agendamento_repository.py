@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from models.agendamento_model import Agendamento
 from schemas.agendamento_schema import AgendamentoCreate
-
+#comentario
 def create_agendamento(db: Session, agendamento: AgendamentoCreate):
     db_agendamento = Agendamento(
         motorista_id=agendamento.motorista_id,

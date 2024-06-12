@@ -1,33 +1,79 @@
-from sqlalchemy.orm import Session
-from models.veiculo_model import Veiculo
-from schemas.veiculo_schema import VeiculoCreate
+from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
 
-def create_veiculo(db: Session, veiculo: VeiculoCreate):
-    db_veiculo = Veiculo(
-        motorista_id=veiculo.motorista_id,
-        placa=veiculo.placa,
-        renavam=veiculo.renavam,
-        chassis=veiculo.chassis,
-        ano_fabricacao=veiculo.ano_fabricacao,
-        cor=veiculo.cor,
-        modelo=veiculo.modelo,
-        foto_veiculo=veiculo.foto_veiculo
-    )
-    db.add(db_veiculo)
-    db.commit()
-    db.refresh(db_veiculo)
-    return db_veiculo
+class ViagemBaseModel(BaseModel):
+    """
+    Modelo base para viagenss.
+    """
+    agendamento_id: int
+    motorista_id: int
+    cliente_id: int
+    hora_inicio: datetime
+    hora_termino: datetime
+    distancia: float
+    data: datetime
+    forma_pagamento: str
+    valor: float
 
-def get_veiculo(db: Session, veiculo_id: int):
-    return db.query(Veiculo).filter(Veiculo.veiculo_id == veiculo_id).first()
+class ViagemCreateSchema(ViagemBaseModel):
+    """
+    Esquema para criação de viagens, baseado no modelo base.
+    """
+    pass
 
-def get_veiculos(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(Veiculo).offset(skip).limit(limit).all()
+class ViagemModel(ViagemBaseModel):
+    """
+    Modelo completo para viagens, incluindo o ID da viagem.
+    """
+    viagem_id: int
 
-def delete_veiculo(db: Session, veiculo_id: int):
-    db_veiculo = get_veiculo(db, veiculo_id)
-    if db_veiculo:
-        db.delete(db_veiculo)
-        db.commit()
-        return db_veiculo
-    return None
+class ViagemService:
+    def __init__(self, db_session):
+        self.db_session = db_session
+
+    def criar_viagem(self, dados_viagem: ViagemCreateSchema):
+        """
+        Cria uma nova viagem no banco de dados.
+
+        :param dados_viagem: Dados da viagem a serem inseridos
+        :return: Viagem criada
+        """
+        db_viagem = ViagemModel(**dados_viagem.dict())
+        self.db_session.add(db_viagem)
+        self.db_session.commit()
+        self.db_session.refresh(db_viagem)
+        return db_viagem
+
+    def buscar_viagem(self, viagem_id: int):
+        """
+        Busca uma viagem no banco de dados pelo seu ID.
+
+        :param viagem_id: ID da viagem a ser buscada
+        :return: Viagem encontrada, ou None se não encontrada
+        """
+        return self.db_session.query(ViagemModel).filter(ViagemModel.viagem_id == viagem_id).first()
+
+    def listar_viagens(self, pular: int = 0, limite: int = 10):
+        """
+        Lista as viagens presentes no banco de dados.
+
+        :param pular: Quantidade de registros a pular
+        :param limite: Quantidade máxima de registros a serem retornados
+        :return: Lista de viagens
+        """
+        return self.db_session.query(ViagemModel).offset(pular).limit(limite).all()
+
+    def deletar_viagem(self, viagem_id: int):
+        """
+        Deleta uma viagem do banco de dados.
+
+        :param viagem_id: ID da viagem a ser deletada
+        :return: Viagem deletada, ou None se não encontrada
+        """
+        db_viagem = self.buscar_viagem(viagem_id)
+        if db_viagem:
+            self.db_session.delete(db_viagem)
+            self.db_session.commit()
+            return db_viagem
+        return None

@@ -1,20 +1,45 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, Time, Date
-from sqlalchemy.orm import relationship  # Importe a função relationship
+from sqlalchemy.orm import Session
+from models import Viagem
 
-from config.database import Base
+class ViagemRepository:
+    """
+    Classe responsável por operações relacionadas à persistência de Viagem.
+    """
+    def __init__(self, db_session: Session):
+        """
+        Inicializa a classe com uma sessão de banco de dados.
+        """
+        self.db_session = db_session
+    
+    def create_viagem(self, viagem_data):
+        """
+        Cria uma nova viagem com os dados fornecidos.
+        """
+        nova_viagem = Viagem(**viagem_data)
+        self.db_session.add(nova_viagem)
+        self.db_session.commit()
+        return nova_viagem
 
-class Viagem(Base):
-    __tablename__ = 'tb_viagem'
+    def get_viagens(self, skip=0, limit=10):
+        """
+        Recupera uma lista de viagens com paginação.
+        """
+        return self.db_session.query(Viagem).offset(skip).limit(limit).all()
+    
+    def get_viagem(self, viagem_id):
+        """
+        Recupera uma única viagem pelo seu ID.
+        """
+        return self.db_session.query(Viagem).filter(Viagem.id_viagem == viagem_id).first()
 
-    viagem_id = Column(Integer, primary_key=True, index=True)
-    tb_agendamento_agendamento_id = Column(Integer, ForeignKey("tb_agendamento.agendamento_id"), nullable=False)
-    tb_motorista_motorista_id = Column(Integer, ForeignKey("tb_motorista.motorista_id"), nullable=False)
-    tb_cliente_cliente_id = Column(Integer, ForeignKey("tb_cliente.cliente_id"), nullable=False)
-    hora_inicio = Column(Time, nullable=False)
-    hora_termino = Column(Time, nullable=False)
-    distancia = Column(Float, nullable=False)
-    data_2 = Column(Date, nullable=False)
-    forma_pagamento = Column(String, nullable=False)
-    valor = Column(Float, nullable=False)
+    def delete_viagem(self, viagem_id):
+        """
+        Exclui uma viagem pelo seu ID.
+        """
+        viagem = self.get_viagem(viagem_id)
+        if viagem:
+            self.db_session.delete(viagem)
+            self.db_session.commit()
+            return viagem
+        return None
 
-    agendamento = relationship("Agendamento")  # Adicione a definição do relacionamento

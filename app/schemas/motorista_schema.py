@@ -1,25 +1,26 @@
 from pydantic import BaseModel
 from datetime import date
 
-class MotoristaBase(BaseModel):
-    nome: str
-    cpf: str
-    email: str
-    senha: str
-    rg: str
-    chn: str
-    data_nascimento: date
-    sexo: str
-    nome_mae: str
-    cep: str
-    telefone: str
-    foto: bytes
-
-class MotoristaCreate(MotoristaBase):
-    pass
-
-class Motorista(MotoristaBase):
-    motorista_id: int
+class Motorista(BaseModel):
+    """
+    Classe que representa um motorista.
+    """
+    nome: str  # Nome do motorista
+    cpf: str  # CPF do motorista
+    email: str  # Email do motorista
+    senha: str  # Senha do motorista
+    rg: str  # RG do motorista
+    chn: str  # CNH do motorista
+    data_nascimento: date  # Data de nascimento do motorista
+    sexo: str  # Sexo do motorista
+    nome_mae: str  # Nome da mãe do motorista
+    cep: str  # CEP do motorista
+    telefone: str  # Telefone do motorista
+    foto: bytes  # Foto do motorista, armazenada como bytes
+    motorista_id: int = None  # ID do motorista (opcional, será preenchido posteriormente)
 
     class Config:
-        from_attributes = True  # Alterado de 'orm_mode' para 'from_attributes'
+        """
+        Configuração da classe Motorista para permitir criar instâncias a partir de atributos.
+        """
+        from_attributes = True

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -11,7 +11,7 @@ class ClienteDB(Base):
     cpf: str = Column(String(11), nullable=False)
     email: str = Column(String(255), nullable=False)
     senha: str = Column(String(255), nullable=False)
-    endereco: str = Column(String(255), nullable=False)
+    cep = Column(String, ForeignKey('tb_endereco.cep'))
     telefone: str = Column(String(11), nullable=False)
     dt_nascimento: Date = Column(Date, nullable=False)
     sexo: str  = Column(String(9), nullable=False)

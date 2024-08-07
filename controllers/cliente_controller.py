@@ -5,10 +5,19 @@ from dependencies.db import get_db
 from schemas.cliente_schema import ClienteRequest, ClienteResponse
 from models.cliente_model import ClienteDB
 from repositories.cliente_repository import ClienteRepository
+import bcrypt
+def criptografar(senha:str)->str:
+    senha_byte=senha.encode("utf-8")
+    senha_criptografada=bcrypt.hashpw(senha_byte,bcrypt.gensalt())
+    return senha_criptografada.decode("utf-8")
 
 def create_cliente(request: ClienteRequest, db: Session = Depends(get_db)):
-    cliente = ClienteRepository.save(db, ClienteDB(**request.model_dump()))
-    return ClienteResponse.model_validate(cliente)
+   criptografar_senha=criptografar(request.senha)
+   cliente=ClienteDB(nome=request.nome, cpf=request.cpf, email=request.email, senha=criptografar_senha, cep=request.cep, telefone=request.telefone, dt_nascimento=request.dt_nascimento, sexo=request.sexo)
+   db.add(cliente)
+   db.commit()
+   db.refresh(cliente)
+   return cliente
 
 def get_all_clientes(db: Session = Depends(get_db)):
     clientes = ClienteRepository.find_all(db)

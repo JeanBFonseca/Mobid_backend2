@@ -6,7 +6,7 @@ class ClienteBase(BaseModel):
     cpf: str 
     email: str 
     senha: str 
-    endereco: str 
+    cep: str
     telefone: str 
     dt_nascimento: date
     sexo: str 
